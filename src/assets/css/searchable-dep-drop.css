@@ -1,0 +1,66 @@
+/* Styles for the SearchableDepDrop widget */
+.sdd-container {
+    position: relative;
+}
+
+.sdd-display {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #fff;
+    min-height: 34px; /* Match bootstrap input height */
+    line-height: 1.42857143;
+}
+
+.sdd-display.sdd-placeholder {
+    color: #999;
+}
+
+.sdd-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    background-color: #fff;
+    z-index: 1051; /* Above most elements, like modals */
+    display: none;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+
+.sdd-search {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.sdd-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.sdd-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sdd-list li:hover, .sdd-list li.sdd-active {
+    background-color: #f5f5f5;
+}
+
+.sdd-list li.sdd-no-results {
+    color: #999;
+    cursor: default;
+    padding: 8px 12px;
+}
