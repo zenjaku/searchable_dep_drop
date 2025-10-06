@@ -1,6 +1,6 @@
 <?php
 
-namespace common\widgets\searchable_dep_drop;
+namespace tomaraoo\searchabledepdrop\widgets;
 
 use yii\web\AssetBundle;
 

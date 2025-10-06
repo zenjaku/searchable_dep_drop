@@ -1,13 +1,13 @@
 <?php
 
-namespace common\widgets\searchable_dep_drop;
+namespace tomaraoo\searchabledepdrop\widgets;
 
-use yii\widgets\InputWidget;
+use yii\base\Widget;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 
-class SearchableDepDrop extends InputWidget
+class SearchableDepDrop extends Widget
 {
     public $data = [];
     public $url;
