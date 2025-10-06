@@ -4,6 +4,8 @@
     var SearchableDepDrop = function (element, options) {
         this.$container = $(element);
         this.options = options;
+        this.allowMultiple = options.allowMultiple || false;
+        this.selectedValues = [];
         this.init();
     };
 
@@ -22,6 +24,7 @@
             this.data = this.options.data || {};
             this.isDependent = this.options.url && this.options.depends && this.options.depends.length > 0;
             this.isLoading = false;
+            this.options.rowSelector = this.options.rowSelector || '.item-item, .item';
 
             // Populate initial state
             this.populateList(this.data);
@@ -39,8 +42,12 @@
         bindEvents: function () {
             var self = this;
 
-            // Toggle dropdown
-            this.$display.on('click', function () {
+            this.$display.on('click', function (e) {
+                // Prevent dropdown from opening when clicking remove buttons
+                if ($(e.target).hasClass('sdd-remove-btn') || $(e.target).closest('.sdd-remove-btn').length > 0) {
+                    return;
+                }
+                
                 if (self.$dropdown.is(':visible')) {
                     self.closeDropdown();
                 } else {
@@ -48,12 +55,10 @@
                 }
             });
 
-            // Search
             this.$search.on('keyup', function () {
                 self.filterList($(this).val());
             });
 
-            // Select item
             this.$list.on('click', 'li:not(.sdd-no-results)', function () {
                 var $li = $(this);
                 var value = $li.data('value');
@@ -61,31 +66,85 @@
                 self.selectItem(value, text);
             });
 
-            // Close when clicking outside
+            // Event delegation for dynamically created remove buttons
+            this.$container.on('click', '.sdd-remove-btn', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                var value = $(this).data('value');
+                self.removeSelectedItem(value);
+                return false;
+            });
+
             $(document).on('click', function (e) {
                 if (!self.$container.is(e.target) && self.$container.has(e.target).length === 0) {
                     self.closeDropdown();
                 }
             });
 
-            // Dependent logic
             if (this.isDependent) {
-                var eventName = 'change.sdd';
-                $.each(this.options.depends, function (i, parentId) {
-                    // Use a namespaced event to avoid conflicts
-                    $(document).off(eventName, '#' + parentId).on(eventName, '#' + parentId, $.proxy(self.fetchDependentData, self));
+                var eventName = 'change.sdd.' + this.$container.attr('id');
+                var $row = this.$container.closest(this.options.rowSelector);
+
+                $.each(this.options.depends, function (i, parentDep) {
+                    var $parentContainer;
+                    var parentSelector = parentDep;
+
+                    if (!parentDep.startsWith('.') && !parentDep.startsWith('#')) {
+                        parentSelector = '#' + parentDep;
+                    }
+
+                    if (parentSelector.startsWith('.')) {
+                        if ($row.length) {
+                            $parentContainer = $row.find(parentSelector);
+                        } else {
+                            $parentContainer = $(parentSelector);
+                        }
+                        
+                        if ($parentContainer.length) {
+                            var $parentInput = $parentContainer.find('input[type="hidden"]');
+                            $parentInput.off(eventName).on(eventName, $.proxy(self.fetchDependentData, self));
+                        }
+                    } else {
+                        $(document).off('change.sdd', parentSelector).on('change.sdd', parentSelector, $.proxy(self.fetchDependentData, self));
+                    }
                 });
-                // Also trigger on init to load initial data if parent has value
-                this.fetchDependentData();
+
+                setTimeout($.proxy(this.fetchDependentData, this), 100);
             }
         },
 
         initSelection: function () {
             var initialValue = this.options.initialValue;
             if (initialValue !== null && initialValue !== undefined && initialValue !== '') {
-                var text = this.getTextFromValue(initialValue);
-                if (text !== null) {
-                    this.selectItem(initialValue, text, true);
+                if (this.allowMultiple) {
+                    var values = initialValue.toString().split(',');
+                    var texts = [];
+                    for (var i = 0; i < values.length; i++) {
+                        var value = values[i].trim();
+                        if (value) {
+                            var text = this.getTextFromValue(value);
+                            if (text !== null) {
+                                this.selectedValues.push(value);
+                                texts.push(text);
+                                this.$list.find('li').filter(function () {
+                                    return $(this).data('value') == value;
+                                }).addClass('sdd-active');
+                            }
+                        }
+                    }
+                    
+                    if (this.selectedValues.length > 0) {
+                        this.updateMultipleDisplay();
+                        this.$hiddenInput.val(this.selectedValues.join(','));
+                    } else {
+                        this.clear();
+                    }
+                } else {
+                    var text = this.getTextFromValue(initialValue);
+                    if (text !== null) {
+                        this.selectItem(initialValue, text, true);
+                    }
                 }
             } else {
                 this.clear();
@@ -95,9 +154,9 @@
         getTextFromValue: function (value) {
             var text = null;
             $.each(this.data, function (val, txt) {
-                if (val == value) { // Use == for loose comparison
+                if (val == value) {
                     text = txt;
-                    return false; // break
+                    return false;
                 }
             });
             return text;
@@ -138,24 +197,44 @@
         selectItem: function (value, text, isInitialization) {
             isInitialization = isInitialization || false;
 
-            // Only trigger change if value is different
-            if (this.$hiddenInput.val() != value) {
-                this.$hiddenInput.val(value).trigger('change.sdd');
-            }
+            if (this.allowMultiple) {
+                var index = this.selectedValues.indexOf(value);
+                if (index === -1) {
+                    this.selectedValues.push(value);
+                    this.$list.find('li').filter(function () {
+                        return $(this).data('value') == value;
+                    }).addClass('sdd-active');
+                } else {
+                    this.selectedValues.splice(index, 1);
+                    this.$list.find('li').filter(function () {
+                        return $(this).data('value') == value;
+                    }).removeClass('sdd-active');
+                }
+                
+                this.updateMultipleDisplay();
+                this.$hiddenInput.val(this.selectedValues.join(',')).trigger('change.sdd');
+                
+                if (!isInitialization) {
+                    this.filterList('');
+                }
+            } else {
+                if (this.$hiddenInput.val() != value) {
+                    this.$hiddenInput.val(value).trigger('change.sdd');
+                }
 
-            this.$display.text(text).removeClass('sdd-placeholder');
-            this.$list.find('li').removeClass('sdd-active');
-            this.$list.find('li').filter(function () {
-                return $(this).data('value') == value;
-            }).addClass('sdd-active');
+                this.$display.html('<span>' + text + '</span>').removeClass('sdd-placeholder');
+                this.$list.find('li').removeClass('sdd-active');
+                this.$list.find('li').filter(function () {
+                    return $(this).data('value') == value;
+                }).addClass('sdd-active');
 
-            if (!isInitialization) {
-                this.closeDropdown();
+                if (!isInitialization) {
+                    this.closeDropdown();
+                }
             }
         },
 
         openDropdown: function () {
-            // Close other open dropdowns
             $('.sdd-container').not(this.$container).find('.sdd-dropdown').hide();
             this.$dropdown.show();
             this.$search.val('').focus();
@@ -166,18 +245,64 @@
             this.$dropdown.hide();
         },
 
+        updateMultipleDisplay: function () {
+            if (!this.allowMultiple) return;
+            
+            if (this.selectedValues.length === 0) {
+                this.$display.html('<span class="sdd-placeholder">' + this.options.placeholder + '</span>').addClass('sdd-placeholder');
+            } else {
+                var self = this;
+                var displayHtml = '';
+                
+                // Create individual chips for each selected item with remove buttons
+                $.each(this.selectedValues, function (index, value) {
+                    var text = self.getTextFromValue(value);
+                    if (text) {
+                        displayHtml += '<div class="sdd-selected-item-container"><span class="sdd-selected-item" data-value="' + value + '">' + 
+                                     '<span class="sdd-item-text">' + text + '</span>' +
+                                     '<span class="sdd-remove-btn" data-value="' + value + '">−</span>' +
+                                     '</span></div>';
+                    }
+                });
+                
+                this.$display.html(displayHtml).removeClass('sdd-placeholder');
+            }
+        },
+
+        removeSelectedItem: function (value) {
+            if (!this.allowMultiple) return;
+            
+            // Convert to string to ensure type consistency with selectedValues array
+            var stringValue = String(value);
+            var index = this.selectedValues.indexOf(stringValue);
+            
+            if (index !== -1) {
+                this.selectedValues.splice(index, 1);
+                this.$list.find('li').filter(function () {
+                    return $(this).data('value') == value;
+                }).removeClass('sdd-active');
+                
+                this.updateMultipleDisplay();
+                this.$hiddenInput.val(this.selectedValues.join(',')).trigger('change.sdd');
+            }
+        },
+
         clear: function () {
             this.$hiddenInput.val('').trigger('change.sdd');
-            this.$display.text(this.options.placeholder).addClass('sdd-placeholder');
+            if (this.allowMultiple) {
+                this.selectedValues = [];
+                this.updateMultipleDisplay();
+            } else {
+                this.$display.text(this.options.placeholder).addClass('sdd-placeholder');
+            }
             this.$list.find('li').removeClass('sdd-active');
         },
 
         setLoading: function (loading) {
             this.isLoading = loading;
             if (loading) {
-                this.$display.text('Loading...').addClass('sdd-placeholder');
+                this.$display.text(this.options.loadingText || 'Loading...').addClass('sdd-placeholder');
             } else {
-                // If not loading and no value, revert to placeholder
                 if (!this.$hiddenInput.val()) {
                     this.$display.text(this.options.placeholder).addClass('sdd-placeholder');
                 }
@@ -188,33 +313,48 @@
             var self = this;
             var parentValues = {};
             var allParentsHaveValue = true;
+            var $row = this.$container.closest(this.options.rowSelector);
 
-            $.each(this.options.depends, function (i, parentId) {
-                var $parentContainer = $('#' + parentId);
-                var $parentInput = $parentContainer.find('input[type="hidden"]');
-                var parentVal = $parentInput.val();
+                $.each(this.options.depends, function (i, parentDep) {
+                    var $parentContainer;
+                    var parentSelector = parentDep;
 
-                if (parentVal === '' || parentVal === null) {
-                    allParentsHaveValue = false;
-                    return; // continue to next iteration
-                }
+                    if (!parentDep.startsWith('.') && !parentDep.startsWith('#')) {
+                        parentSelector = '#' + parentDep;
+                    }
 
-                // Determine the parameter name - ONLY ONCE
-                var paramName;
+                    if (parentSelector.startsWith('.')) {
+                        if ($row.length) {
+                            $parentContainer = $row.find(parentSelector);
+                        } else {
+                            $parentContainer = $(parentSelector);
+                        }
+                    } else {
+                        $parentContainer = $(parentSelector);
+                    }
 
-                // First priority: use explicitly configured paramNames
-                if (self.options.paramNames && self.options.paramNames[i]) {
-                    paramName = self.options.paramNames[i];
-                }
-                // Second priority: extract from the parent input's name attribute
-                else {
-                    var parentName = $parentInput.attr('name');
-                    paramName = self.extractFieldName(parentName) || parentId;
-                }
+                    if (!$parentContainer || $parentContainer.length === 0) {
+                        allParentsHaveValue = false;
+                        return;
+                    }
+                    
+                    var $parentInput = $parentContainer.find('input[type="hidden"]');
+                    var parentVal = $parentInput.val();
 
-                // Set the parameter value - ONLY ONCE
-                parentValues[paramName] = parentVal;
-            });
+                    if (parentVal === '' || parentVal === null) {
+                        allParentsHaveValue = false;
+                        return;
+                    }
+
+                    var paramName;
+                    if (self.options.paramNames && self.options.paramNames[i]) {
+                        paramName = self.options.paramNames[i];
+                    } else {
+                        var parentName = $parentInput.attr('name');
+                        paramName = self.extractFieldName(parentName) || parentDep.replace(/[^a-zA-Z0-9_]/g, '');
+                    }
+                    parentValues[paramName] = parentVal;
+                });
 
             if (!allParentsHaveValue) {
                 this.clear();
@@ -233,23 +373,20 @@
                     var data = {};
                     if (response.output) {
                         $.each(response.output, function (i, item) {
-                            // Support both 'name' and 'text' keys for compatibility
                             var text = item.name || item.text || '';
                             data[item.id] = text;
                         });
                     }
                     self.populateList(data);
 
-                    // Check if we should select a value
                     var currentValue = self.$hiddenInput.val();
-                    if (currentValue && data[currentValue]) {
+                    if (self.options.initialize && currentValue && data[currentValue]) {
                         self.selectItem(currentValue, data[currentValue], true);
                     } else {
                         self.clear();
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error fetching dependent data for ' + self.$container.attr('id'), error);
                     self.clear();
                     self.populateList({});
                 },
@@ -259,11 +396,10 @@
             });
         },
 
-        // Helper function to extract field name from various input name formats
         extractFieldName: function (fullName) {
             if (!fullName) return null;
-
-            var matches = fullName.match(/(?:\[([^\]]+)\]|[^\[\]]+)$/);
+            // Extract field name from array notation like "Model[field]" or "Model[0][field]"
+            var matches = fullName.match(/(?:\\\[([^\\\]]+)\\\]|[^\\\[\\\]]+)$/);
             return matches ? matches[1] || matches[0] : fullName;
         }
     };
@@ -277,7 +413,8 @@
                 options = typeof option === 'object' && option;
 
             if (!data) {
-                $this.data('searchableDepDrop', (data = new SearchableDepDrop(this, $.extend({}, $.fn.searchableDepDrop.defaults, options, $(this).data()))));
+                var pluginOptions = $.extend({}, $.fn.searchableDepDrop.defaults, options, $this.data('sdd-options'));
+                $this.data('searchableDepDrop', (data = new SearchableDepDrop(this, pluginOptions)));
             }
 
             if (typeof option === 'string') {

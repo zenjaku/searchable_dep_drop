@@ -1,12 +1,13 @@
 <?php
-namespace tomaraoo\searchabledepdrop\widgets;
 
-use yii\base\Widget;
+namespace common\widgets\searchable_dep_drop;
+
+use yii\widgets\InputWidget;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 
-class SearchableDepDrop extends Widget
+class SearchableDepDrop extends InputWidget
 {
     public $data = [];
     public $url;
@@ -14,11 +15,12 @@ class SearchableDepDrop extends Widget
     public $paramNames = [];
     public $placeholder = 'Select...';
     public $pluginOptions = [];
+    public $rowSelector = '.item-item, .item';
+    public $allowMultiple = false;
 
     public function init()
     {
         parent::init();
-        // Ensure the widget has an ID
         if (!isset($this->options['id'])) {
             $this->options['id'] = $this->getId();
         }
@@ -59,6 +61,8 @@ class SearchableDepDrop extends Widget
         $clientOptions = $this->pluginOptions;
         $clientOptions['data'] = $this->data;
         $clientOptions['placeholder'] = $this->placeholder;
+        $clientOptions['rowSelector'] = $this->rowSelector;
+        $clientOptions['allowMultiple'] = $this->allowMultiple;
 
         if (!empty($this->paramNames)) {
             $clientOptions['paramNames'] = $this->paramNames;
