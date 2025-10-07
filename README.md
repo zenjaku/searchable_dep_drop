@@ -3,10 +3,13 @@
 A reusable Yii2 widget that provides a searchable dropdown list with support for dependent (cascading) dropdowns.  
 It is designed to work seamlessly within the `wbraganca/yii2-dynamicform` widget and has no dependency on any specific CSS framework like Bootstrap.
 
+> **Note:** This package uses the `rft\searchabledepdrop\widgets` namespace. Make sure to update your imports if you're upgrading from an older version.
+
 ## Features
 
 - Searchable dropdown list.
 - Support for dependent dropdowns (e.g., State -> City).
+- **Multiple selection support** - Allow users to select multiple values.
 - Works with `wbraganca/yii2-dynamicform` for creating dynamic forms.
 - Framework-independent styling.
 - Compatible with PHP 5.6+ and modern Yii2 projects.
@@ -18,19 +21,19 @@ It is designed to work seamlessly within the `wbraganca/yii2-dynamicform` widget
 The preferred way to install this extension is through [Composer](https://getcomposer.org/).
 
 ```bash
-composer require tomaraoo/searchabledepdrop
+composer require rft/yii2-searchable-depdrop
 ```
-
-(Replace `tomaraoo/searchabledepdrop` with your actual GitHub/Packagist package name.)
 
 Yii2 will automatically load the widget via Composer’s autoloader.
 
 ### Manual Installation (Alternative)
 
-If you don’t want to use Composer, you can still install it manually:
+If you don't want to use Composer, you can still install it manually:
 
-1. Copy the entire `common/widgets/searchable_dep_drop` directory into your project’s `common/widgets` (or any other suitable location).
-2. Ensure the namespace in the widget files matches the new location if you change it.
+1. Download the source files from the `src/` directory
+2. Place them in your project's widget directory (e.g., `common/widgets/searchable_dep_drop/`)
+3. Ensure the namespace in the widget files matches the new location if you change it
+4. Include the CSS and JS assets from the `src/assets/` directory
 
 ## Usage
 
@@ -78,7 +81,7 @@ In your view file, you can use the widget like any other Yii2 input widget.
 **A. Standalone Searchable Dropdown**
 
 ```php
-use tomaraoo\searchabledepdrop\SearchableDepDrop;
+use rft\searchabledepdrop\widgets\SearchableDepDrop;
 
 echo $form->field($model, 'state')->widget(SearchableDepDrop::class, [
     'data' => [
@@ -90,12 +93,31 @@ echo $form->field($model, 'state')->widget(SearchableDepDrop::class, [
 ]);
 ```
 
-**B. Dependent Dropdown**
+**B. Multiple Selection Dropdown**
+
+```php
+use rft\searchabledepdrop\widgets\SearchableDepDrop;
+
+echo $form->field($model, 'tags')->widget(SearchableDepDrop::class, [
+    'data' => [
+        '1' => 'PHP',
+        '2' => 'JavaScript',
+        '3' => 'Python',
+        '4' => 'Java',
+        '5' => 'C#',
+        // ... other options
+    ],
+    'allowMultiple' => true,
+    'placeholder' => 'Select multiple technologies...',
+]);
+```
+
+**C. Dependent Dropdown**
 
 Example for a State → City dropdown setup:
 
 ```php
-use tomaraoo\searchabledepdrop\SearchableDepDrop;
+use rft\searchabledepdrop\widgets\SearchableDepDrop;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use common\models\AddressCity;
@@ -125,6 +147,23 @@ echo $form->field($model, 'city_id')->widget(SearchableDepDrop::class, [
     ],
 ])->label('City/Municipality');
 ```
+
+---
+
+## Configuration Options
+
+The widget supports several configuration options:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `data` | array | `[]` | Array of options for the dropdown |
+| `url` | string | `null` | URL for dependent dropdown data |
+| `depends` | array | `[]` | Array of parent field IDs for dependent dropdowns |
+| `paramNames` | array | `[]` | Custom parameter names for dependent requests |
+| `placeholder` | string | `'Select...'` | Placeholder text for the dropdown |
+| `allowMultiple` | boolean | `false` | Enable multiple selection |
+| `rowSelector` | string | `'.item-item, .item'` | CSS selector for dynamic form rows |
+| `pluginOptions` | array | `[]` | Additional JavaScript options |
 
 ---
 
