@@ -11,7 +11,8 @@ It is designed to work seamlessly within the `wbraganca/yii2-dynamicform` widget
 - Support for dependent dropdowns (e.g., State -> City).
 - **Multiple selection support** - Allow users to select multiple values.
 - Works with `wbraganca/yii2-dynamicform` for creating dynamic forms.
-- Framework-independent styling.
+- Framework-independent styling with modern, responsive design.
+- Custom styling for multiple selection with removable tags.
 - Compatible with PHP 5.6+ and modern Yii2 projects.
 
 ## Installation
@@ -147,6 +148,99 @@ echo $form->field($model, 'city_id')->widget(SearchableDepDrop::class, [
     ],
 ])->label('City/Municipality');
 ```
+
+---
+
+## Styling Features
+
+The widget comes with built-in CSS that provides:
+
+- **Modern Design**: Clean, professional appearance with subtle shadows and borders
+- **Responsive Layout**: Adapts to different screen sizes and container widths
+- **Multiple Selection Tags**: Selected items appear as removable tags with:
+  - Black background with white text
+  - Rounded corners (12px border-radius)
+  - Remove button (×) with hover effects
+  - Text truncation for long items
+- **Search Interface**: Dedicated search input with clear visual separation
+- **Dropdown Styling**: 
+  - Smooth hover effects
+  - Scrollable list (max-height: 200px)
+  - Active item highlighting
+  - No results message styling
+- **Framework Independence**: No dependency on Bootstrap or other CSS frameworks
+
+### Custom Styling
+
+You can override the default styles by targeting the CSS classes:
+
+```css
+/* Main container */
+.sdd-container {
+    /* Your custom styles */
+}
+
+/* Display area */
+.sdd-display {
+    border: 2px solid #your-color;
+    border-radius: 6px;
+}
+
+/* Selected items in multiple selection */
+.sdd-selected-item {
+    background-color: #your-color;
+    border-radius: 8px;
+}
+
+.sdd-selected-item-container {
+    max-width: 100px; /* Adjust tag width */
+}
+
+.sdd-item-text {
+    font-size: 12px; /* Adjust text size */
+}
+
+.sdd-remove-btn {
+    color: #your-remove-color;
+}
+
+/* Dropdown */
+.sdd-dropdown {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+/* Search input */
+.sdd-search {
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+/* List items */
+.sdd-list li {
+    padding: 10px 15px;
+}
+
+.sdd-list li:hover {
+    background-color: #your-hover-color;
+}
+```
+
+### Available CSS Classes
+
+| Class | Purpose |
+|-------|---------|
+| `.sdd-container` | Main widget container |
+| `.sdd-display` | Display area showing selected values |
+| `.sdd-selected-item` | Individual selected item tag |
+| `.sdd-selected-item-container` | Container for selected item and remove button |
+| `.sdd-item-text` | Text within selected item |
+| `.sdd-remove-btn` | Remove button (×) for selected items |
+| `.sdd-dropdown` | Dropdown container |
+| `.sdd-search` | Search input field |
+| `.sdd-list` | List of available options |
+| `.sdd-active` | Currently highlighted option |
+| `.sdd-no-results` | No results message |
 
 ---
 

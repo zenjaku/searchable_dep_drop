@@ -133,16 +133,16 @@
     padding: 0;
     margin: 0;
     max-height: 200px;
-    text-wrap: nowrap;
+    text-wrap: wrap;
     overflow-y: auto;
+    /* border: 1px solid #ababab; */
 }
 
 .sdd-list li {
     padding: 8px 12px;
+    text-wrap: wrap;
     cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .sdd-list li:hover,
