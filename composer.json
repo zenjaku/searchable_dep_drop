@@ -1,5 +1,5 @@
 {
-  "name": "tomaraoo/yii2-searchable-depdrop",
+  "name": "rft/yii2-searchable-depdrop",
   "description": "A custom searchable dependent dropdown widget for Yii2",
   "type": "yii2-extension",
   "keywords": [
@@ -17,7 +17,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "tomaraoo\\searchabledepdrop\\": "src/"
+      "rft\\searchabledepdrop\\": "src/"
     }
   },
   "require": {

@@ -1,6 +1,6 @@
 <?php
 
-namespace tomaraoo\searchabledepdrop\widgets;
+namespace rft\searchabledepdrop\widgets;
 
 use yii\base\Widget;
 use yii\helpers\Html;
