@@ -31,16 +31,19 @@
     align-items: flex-start;
     padding-top: 4px;
     padding-bottom: 4px;
+    overflow: visible;
+    white-space: normal;
 }
 
 
 .sdd-display:not(.sdd-placeholder)>span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
     flex: 1;
     min-width: 0;
-    display: block;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
 }
 
 .sdd-display.sdd-placeholder {
@@ -52,12 +55,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    max-width: 80px;
+    width: auto;
+    min-width: fit-content;
     flex-shrink: 0;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     gap: 4px;
 }
 
@@ -68,24 +69,24 @@
     align-items: center;
     background-color: #000000;
     border: 1px solid #000000;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 2px 8px;
     margin: 1px 2px;
     font-size: 11px;
     line-height: 1.2;
-    width: 100%;
-    max-width: 80px;
+    width: auto;
+    min-width: fit-content;
     flex-shrink: 0;
     white-space: nowrap;
+    max-width: none;
 }
 
 .sdd-item-text {
     margin-right: 4px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 90px;
     font-size: 11px;
+    max-width: none;
+    overflow: visible;
 }
 
 .sdd-remove-btn {
