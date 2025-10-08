@@ -2,12 +2,12 @@
 
 namespace rft\searchabledepdrop\widgets;
 
-use yii\base\Widget;
+use yii\widgets\InputWidget;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 
-class SearchableDepDrop extends Widget
+class SearchableDepDrop extends InputWidget
 {
     public $data = [];
     public $url;
