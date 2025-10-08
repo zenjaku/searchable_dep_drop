@@ -6,7 +6,7 @@ use yii\web\AssetBundle;
 
 class SearchableDepDropAsset extends AssetBundle
 {
-    public $sourcePath = '@common/widgets/searchable_dep_drop/assets';
+    public $sourcePath = '@vendor/rft/yii2-searchable-depdrop/src/assets';
 
     public $css = [
         'css/searchable-dep-drop.css',
