@@ -263,28 +263,51 @@ The widget supports several configuration options:
 
 ### 3. Dynamic Form Integration
 
-To make the widget work with `wbraganca/yii2-dynamicform`, you need to add a JavaScript block to your view to initialize the widgets on newly added form rows.
+The widget works seamlessly with `wbraganca/yii2-dynamicform`. Here's how to implement dependent dropdowns in dynamic forms:
 
-Place this **after `ActiveForm::end()`**.
-
+**Essential Widget Usage:**
 ```php
-<?php
-$jsMain = <<<JS
-function initSearchableDepDrop(context) {
-    $(context).find('.sdd-container').each(function() {
-        var $container = $(this);
-        if ($container.data('searchableDepDrop')) {
-            return;
-        }
+use rft\searchabledepdrop\widgets\SearchableDepDrop;
 
+// State dropdown (parent)
+echo $form->field($addresses[$i], "[{$i}]state")->widget(SearchableDepDrop::classname(), [
+    'data' => ArrayHelper::map(
+        AddressCity::find()->select('state')->distinct()->orderBy('state')->all(),
+        'state', 'state'
+    ),
+    'placeholder' => 'Select State...',
+    'options' => ['class' => 'form-control state-dropdown'],
+]);
+
+// City dropdown (child - depends on state)
+echo $form->field($addresses[$i], "[{$i}]city_id")->widget(SearchableDepDrop::classname(), [
+    'data' => [],
+    'placeholder' => 'Select City...',
+    'options' => ['class' => 'form-control city-dropdown'],
+    'pluginOptions' => [
+        'depends' => ['.state-dropdown'],
+        'paramNames' => ['state'],
+        'url' => Url::to(['/site/cities']),
+    ]
+]);
+```
+
+**Required JavaScript for Dynamic Forms:**
+```javascript
+function initSearchableDepDrop(context) {
+    $(context).find(".sdd-container").each(function() {
+        var $container = $(this);
+        if ($container.data('searchableDepDrop')) return;
+        
         var optionsJson = $container.data('sdd-options');
         if (optionsJson) {
             var options = (typeof optionsJson === 'string') ? JSON.parse(optionsJson) : optionsJson;
-
+            
+            // Handle dynamic form index updates
             if (options.depends) {
                 var newDepends = [];
-                var newId = $container.attr('id');
-                var matches = newId.match(/-(\d+)-/);
+                var currentId = $container.attr('id');
+                var matches = currentId.match(/-(\d+)-/);
                 if (matches) {
                     var index = matches[1];
                     $.each(options.depends, function(i, dep) {
@@ -298,22 +321,94 @@ function initSearchableDepDrop(context) {
     });
 }
 
-$('.your-dynamic-form-wrapper-class').on('afterInsert', function(e, item) {
+// Initialize widgets on new form rows
+$('.dynamicform_wrapper').on('afterInsert', function(e, item) {
     initSearchableDepDrop(item);
 });
 
-$('.your-dynamic-form-wrapper-class').on('afterDelete', function(e, item) {
-    // Optional: handle delete cleanup
-});
-
+// Initialize existing widgets
 initSearchableDepDrop(document.body);
-JS;
-
-$this->registerJs($jsMain, \yii\web\View::POS_READY);
-?>
 ```
 
-> ⚠️ Replace `.your-dynamic-form-wrapper-class` with the `widgetContainer` class you defined in `DynamicFormWidget::begin()`.
+> **Note:** Replace `.dynamicform_wrapper` with your actual `widgetContainer` class from `DynamicFormWidget::begin()`.
+
+### Multiple Selection Example
+
+To enable multiple selection in any dropdown, simply set `allowMultiple => true`:
+
+```php
+// Multiple selection for skills/tags
+echo $form->field($model, 'skills')->widget(SearchableDepDrop::classname(), [
+    'data' => [
+        '1' => 'PHP',
+        '2' => 'JavaScript', 
+        '3' => 'Python',
+        '4' => 'Java',
+        '5' => 'C#',
+        '6' => 'Ruby',
+        '7' => 'Go',
+        '8' => 'Swift',
+    ],
+    'allowMultiple' => true,
+    'placeholder' => 'Select your skills...',
+    'options' => ['class' => 'form-control skills-dropdown'],
+]);
+
+// Multiple selection for categories in dynamic form
+echo $form->field($contact, "[{$i}]categories")->widget(SearchableDepDrop::classname(), [
+    'data' => [
+        '1' => 'Business',
+        '2' => 'Personal',
+        '3' => 'Emergency',
+        '4' => 'Family',
+        '5' => 'Friend',
+    ],
+    'allowMultiple' => true,
+    'placeholder' => 'Select contact categories...',
+    'options' => ['class' => 'form-control categories-dropdown'],
+]);
+```
+
+**Important Notes:**
+- For multiple selection, your model attribute should be an array or JSON field
+- The widget automatically handles the serialization of multiple values
+- Selected items appear as removable tags in the display area
+- The `paramNames` option is crucial for dependent dropdowns to work properly
+
+---
+
+## Recent Changes (v1.0.1)
+
+### 🔧 Fixed Issues
+- **Fixed PSR-4 Autoloading**: Reorganized file structure to match namespace requirements
+  - Moved `SearchableDepDrop.php` to `src/widgets/SearchableDepDrop.php`
+  - Moved `SearchableDepDropAsset.php` to `src/widgets/SearchableDepDropAsset.php`
+  - Updated asset sourcePath to use vendor directory path
+  - This resolves the "Class not found" error after composer install
+
+### 🎨 Enhanced Features
+- **Improved CSS Styling**: Enhanced dropdown list items with text wrapping and visual separation
+- **Better Documentation**: Added comprehensive styling documentation and usage examples
+- **Multiple Selection Support**: Full support for selecting multiple values with removable tags
+
+### 📦 Package Structure
+```
+src/
+├── widgets/
+│   ├── SearchableDepDrop.php
+│   └── SearchableDepDropAsset.php
+└── assets/
+    ├── css/
+    │   └── searchable-dep-drop.css
+    └── js/
+        └── searchable-dep-drop.js
+```
+
+### 🔄 Migration Guide
+If you're upgrading from a previous version:
+1. Update your composer package: `composer update rft/yii2-searchable-depdrop`
+2. The namespace remains the same: `use rft\searchabledepdrop\widgets\SearchableDepDrop;`
+3. No code changes required in your existing implementations
 
 ---
 
