@@ -68,7 +68,7 @@ public function actionListCities()
             $out['output'] = $output;
         }
     }
-    
+
     return $out;
 }
 ```
@@ -163,7 +163,7 @@ The widget comes with built-in CSS that provides:
   - Remove button (×) with hover effects
   - Text truncation for long items
 - **Search Interface**: Dedicated search input with clear visual separation
-- **Dropdown Styling**: 
+- **Dropdown Styling**:
   - Smooth hover effects
   - Scrollable list (max-height: 200px)
   - Active item highlighting
@@ -177,70 +177,70 @@ You can override the default styles by targeting the CSS classes:
 ```css
 /* Main container */
 .sdd-container {
-    /* Your custom styles */
+  /* Your custom styles */
 }
 
 /* Display area */
 .sdd-display {
-    border: 2px solid #your-color;
-    border-radius: 6px;
+  border: 2px solid #your-color;
+  border-radius: 6px;
 }
 
 /* Selected items in multiple selection */
 .sdd-selected-item {
-    background-color: #your-color;
-    border-radius: 8px;
+  background-color: #your-color;
+  border-radius: 8px;
 }
 
 .sdd-selected-item-container {
-    max-width: 100px; /* Adjust tag width */
+  max-width: 100px; /* Adjust tag width */
 }
 
 .sdd-item-text {
-    font-size: 12px; /* Adjust text size */
+  font-size: 12px; /* Adjust text size */
 }
 
 .sdd-remove-btn {
-    color: #your-remove-color;
+  color: #your-remove-color;
 }
 
 /* Dropdown */
 .sdd-dropdown {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
 
 /* Search input */
 .sdd-search {
-    padding: 10px 12px;
-    font-size: 14px;
+  padding: 10px 12px;
+  font-size: 14px;
 }
 
 /* List items */
 .sdd-list li {
-    padding: 10px 15px;
+  padding: 10px 15px;
 }
 
 .sdd-list li:hover {
-    background-color: #your-hover-color;
+  background-color: #your-hover-color;
 }
 ```
 
 ### Available CSS Classes
 
-| Class | Purpose |
-|-------|---------|
-| `.sdd-container` | Main widget container |
-| `.sdd-display` | Display area showing selected values |
-| `.sdd-selected-item` | Individual selected item tag |
+| Class                          | Purpose                                       |
+| ------------------------------ | --------------------------------------------- |
+| `.sdd-container`               | Main widget container                         |
+| `.sdd-display`                 | Display area showing selected values          |
+| `.sdd-selected-item`           | Individual selected item tag                  |
 | `.sdd-selected-item-container` | Container for selected item and remove button |
-| `.sdd-item-text` | Text within selected item |
-| `.sdd-remove-btn` | Remove button (×) for selected items |
-| `.sdd-dropdown` | Dropdown container |
-| `.sdd-search` | Search input field |
-| `.sdd-list` | List of available options |
-| `.sdd-active` | Currently highlighted option |
-| `.sdd-no-results` | No results message |
+| `.sdd-item-text`               | Text within selected item                     |
+| `.sdd-remove-btn`              | Remove button (×) for selected items          |
+| `.sdd-dropdown`                | Dropdown container                            |
+| `.sdd-search`                  | Search input field                            |
+| `.sdd-list`                    | List of available options                     |
+| `.sdd-active`                  | Currently highlighted option                  |
+| `.sdd-no-results`              | No results message                            |
 
 ---
 
@@ -248,16 +248,16 @@ You can override the default styles by targeting the CSS classes:
 
 The widget supports several configuration options:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `data` | array | `[]` | Array of options for the dropdown |
-| `url` | string | `null` | URL for dependent dropdown data |
-| `depends` | array | `[]` | Array of parent field IDs for dependent dropdowns |
-| `paramNames` | array | `[]` | Custom parameter names for dependent requests |
-| `placeholder` | string | `'Select...'` | Placeholder text for the dropdown |
-| `allowMultiple` | boolean | `false` | Enable multiple selection |
-| `rowSelector` | string | `'.item-item, .item'` | CSS selector for dynamic form rows |
-| `pluginOptions` | array | `[]` | Additional JavaScript options |
+| Option          | Type    | Default               | Description                                       |
+| --------------- | ------- | --------------------- | ------------------------------------------------- |
+| `data`          | array   | `[]`                  | Array of options for the dropdown                 |
+| `url`           | string  | `null`                | URL for dependent dropdown data                   |
+| `depends`       | array   | `[]`                  | Array of parent field IDs for dependent dropdowns |
+| `paramNames`    | array   | `[]`                  | Custom parameter names for dependent requests     |
+| `placeholder`   | string  | `'Select...'`         | Placeholder text for the dropdown                 |
+| `allowMultiple` | boolean | `false`               | Enable multiple selection                         |
+| `rowSelector`   | string  | `'.item-item, .item'` | CSS selector for dynamic form rows                |
+| `pluginOptions` | array   | `[]`                  | Additional JavaScript options                     |
 
 ---
 
@@ -266,6 +266,7 @@ The widget supports several configuration options:
 The widget works seamlessly with `wbraganca/yii2-dynamicform`. Here's how to implement dependent dropdowns in dynamic forms:
 
 **Essential Widget Usage:**
+
 ```php
 use rft\searchabledepdrop\widgets\SearchableDepDrop;
 
@@ -293,23 +294,26 @@ echo $form->field($addresses[$i], "[{$i}]city_id")->widget(SearchableDepDrop::cl
 ```
 
 **Required JavaScript for Dynamic Forms:**
+
 ```javascript
 function initSearchableDepDrop(context) {
-    $(context).find(".sdd-container").each(function() {
-        var $container = $(this);
-        if ($container.data('searchableDepDrop')) return;
-        
-        var optionsJson = $container.data('sdd-options');
-        if (optionsJson) {
-            var options = (typeof optionsJson === 'string') ? JSON.parse(optionsJson) : optionsJson;
-            $container.searchableDepDrop(options);
-        }
+  $(context)
+    .find(".sdd-container")
+    .each(function () {
+      var $container = $(this);
+      if ($container.data("searchableDepDrop")) return;
+
+      var optionsJson = $container.data("sdd-options");
+      if (optionsJson) {
+        var options = typeof optionsJson === "string" ? JSON.parse(optionsJson) : optionsJson;
+        $container.searchableDepDrop(options);
+      }
     });
 }
 
 // Initialize widgets on new form rows
-$('.dynamicform_wrapper').on('afterInsert', function(e, item) {
-    initSearchableDepDrop(item);
+$(".dynamicform_wrapper").on("afterInsert", function (e, item) {
+  initSearchableDepDrop(item);
 });
 
 // Initialize existing widgets
@@ -327,7 +331,7 @@ To enable multiple selection in any dropdown, simply set `allowMultiple => true`
 echo $form->field($model, 'skills')->widget(SearchableDepDrop::classname(), [
     'data' => [
         '1' => 'PHP',
-        '2' => 'JavaScript', 
+        '2' => 'JavaScript',
         '3' => 'Python',
         '4' => 'Java',
         '5' => 'C#',
@@ -356,6 +360,7 @@ echo $form->field($contact, "[{$i}]categories")->widget(SearchableDepDrop::class
 ```
 
 **Important Notes:**
+
 - For multiple selection, your model attribute should be an array or JSON field
 - The widget automatically handles the serialization of multiple values
 - Selected items appear as removable tags in the display area
@@ -365,19 +370,22 @@ echo $form->field($contact, "[{$i}]categories")->widget(SearchableDepDrop::class
 
 ## Recent Changes (v1.0.1)
 
-### 🔧 Fixed Issues
+### Fixed Issues
+
 - **Fixed PSR-4 Autoloading**: Reorganized file structure to match namespace requirements
   - Moved `SearchableDepDrop.php` to `src/widgets/SearchableDepDrop.php`
   - Moved `SearchableDepDropAsset.php` to `src/widgets/SearchableDepDropAsset.php`
   - Updated asset sourcePath to use vendor directory path
   - This resolves the "Class not found" error after composer install
 
-### 🎨 Enhanced Features
+### Enhanced Features
+
 - **Improved CSS Styling**: Enhanced dropdown list items with text wrapping and visual separation
 - **Better Documentation**: Added comprehensive styling documentation and usage examples
 - **Multiple Selection Support**: Full support for selecting multiple values with removable tags
 
-### 📦 Package Structure
+### Package Structure
+
 ```
 src/
 ├── widgets/
@@ -390,8 +398,10 @@ src/
         └── searchable-dep-drop.js
 ```
 
-### 🔄 Migration Guide
+### Migration Guide
+
 If you're upgrading from a previous version:
+
 1. Update your composer package: `composer update rft/yii2-searchable-depdrop`
 2. The namespace remains the same: `use rft\searchabledepdrop\widgets\SearchableDepDrop;`
 3. No code changes required in your existing implementations
