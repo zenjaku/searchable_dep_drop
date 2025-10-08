@@ -302,20 +302,6 @@ function initSearchableDepDrop(context) {
         var optionsJson = $container.data('sdd-options');
         if (optionsJson) {
             var options = (typeof optionsJson === 'string') ? JSON.parse(optionsJson) : optionsJson;
-            
-            // Handle dynamic form index updates
-            if (options.depends) {
-                var newDepends = [];
-                var currentId = $container.attr('id');
-                var matches = currentId.match(/-(\d+)-/);
-                if (matches) {
-                    var index = matches[1];
-                    $.each(options.depends, function(i, dep) {
-                        newDepends.push(dep.replace(/-(\d+)-/, '-' + index + '-'));
-                    });
-                    options.depends = newDepends;
-                }
-            }
             $container.searchableDepDrop(options);
         }
     });
