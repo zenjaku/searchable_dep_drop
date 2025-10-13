@@ -66,13 +66,12 @@
     display: inline-flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #000000;
-    border: 1px solid #000000;
+    background-color: #008cff;
     border-radius: 5px;
     padding: 2px 8px;
     margin: 1px 2px;
-    font-size: 11px;
-    line-height: 1.2;
+    font-size: 1em;
+    line-height: 2;
     width: auto;
     min-width: fit-content;
     flex-shrink: 0;
@@ -92,7 +91,7 @@
     text-align: end;
     cursor: pointer;
     font-weight: bold;
-    color: #ffc800;
+    color: #ffffff;
     font-size: 14px;
     line-height: 1;
     padding: 0 2px;
